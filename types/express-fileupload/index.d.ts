@@ -1,6 +1,8 @@
-// Type definitions for express-fileupload 0.1
+// Type definitions for express-fileupload 1.1
 // Project: https://github.com/richardgirges/express-fileupload#readme
 // Definitions by: Gintautas Miselis <https://github.com/Naktibalda>
+//                 Sefa Ilkimen <https://github.com/silkimen>
+//                 Tomas Vosicky <https://github.com/vosatom>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.3
 
@@ -9,28 +11,38 @@ import express = require('express');
 declare global {
     namespace Express {
         interface Request {
-            files?: FileArray;
+            files?: fileUpload.FileArray;
         }
     }
 }
 
-export class FileArray {
-    [index: string]: UploadedFile | UploadedFile[]
-}
+export = fileUpload;
 
-export interface UploadedFile {
-    name: string;
-    encoding: string;
-    mimetype: string;
-    data: Buffer;
-    mv(path: string, callback: (err: any) => {}): void;
-}
+declare function fileUpload(options?: fileUpload.Options): express.RequestHandler;
 
-export interface Options {
-    debug?: boolean;
-    safeFileNames?: boolean;
-    preserveExtension?: boolean | string | number;
-    [property: string]: any;
-}
+declare namespace fileUpload {
+    class FileArray {
+        [index: string]: UploadedFile | UploadedFile[]
+    }
 
-export function fileUpload(options?: Options): express.RequestHandler;
+    interface UploadedFile {
+        name: string;
+        encoding: string;
+        mimetype: string;
+        data: Buffer;
+        size: number;
+        tempFilePath: string;
+        truncated: boolean;
+        md5: string;
+        mv(path: string, callback: (err: any) => void): void;
+        mv(path: string): Promise<void>;
+    }
+
+    interface Options {
+        debug?: boolean;
+        safeFileNames?: boolean;
+        preserveExtension?: boolean | string | number;
+        abortOnLimit?: boolean;
+        [property: string]: any;
+    }
+}

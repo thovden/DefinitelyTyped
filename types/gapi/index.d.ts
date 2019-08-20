@@ -1,6 +1,6 @@
-// Type definitions for Google API Client 0.0
-// Project: https://code.google.com/p/google-api-javascript-client/
-// Definitions by: Frank M <https://github.com/sgtfrankieboy>
+// Type definitions for Google API Client
+// Project: https://github.com/google/google-api-javascript-client
+// Definitions by: Frank M <https://github.com/sgtfrankieboy>, grant <https://github.com/grant>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 // TypeScript Version: 2.3
 
@@ -20,10 +20,17 @@ interface GoogleApiOAuth2TokenObject {
      * The duration, in seconds, the token is valid for. Only present in successful responses
      */
     expires_in: string;
+    session_state?: GoogleApiOAuth2TokenSessionState;
     /**
      * The Google API scopes related to this token
      */
     state: string;
+}
+
+interface GoogleApiOAuth2TokenSessionState {
+    extraQueryParams: {
+        authuser: string,
+    };
 }
 
 /**
@@ -35,10 +42,20 @@ interface GoogleApiOAuth2TokenObject {
  */
 declare namespace gapi {
 
+    type LoadCallback = (...args: any[]) => void;
+    type LoadConfig = {
+      callback: LoadCallback,
+      onerror?: Function,
+      timeout?: number,
+      ontimeout?: Function,
+    };
+    type CallbackOrConfig = LoadConfig | LoadCallback;
+
     /**
      * Pragmatically initialize gapi class member.
+     * Reference: https://developers.google.com/api-client-library/javascript/reference/referencedocs#gapiloadlibraries-callbackorconfig
      */
-    export function load(apiName: string, callback: () => void): void;
+    export function load(apiName: string, callback: CallbackOrConfig): void;
 
 }
 
@@ -149,7 +166,7 @@ declare namespace gapi.client {
          * The scopes to request, as a space-delimited string.
          */
         scope?: string,
-                          
+
         hosted_domain?: string;
     }): Promise<void>;
 
@@ -221,6 +238,11 @@ declare namespace gapi.client {
      */
     export function setApiKey(apiKey: string): void;
     /**
+     * Retrieves the OAuth 2.0 token for the application.
+     * @return The OAuth 2.0 token.
+     */
+    export function getToken(): GoogleApiOAuth2TokenObject;
+    /**
      * Sets the authentication token to use in requests.
      * @param token The token to set.
      *
@@ -237,11 +259,7 @@ declare namespace gapi.client {
     }
 
     interface HttpRequestRejected {
-        result: {
-            error: {
-                message: string;
-            }
-        };
+        result: any | boolean;
         body: string;
         headers?: any[];
         status?: number;
